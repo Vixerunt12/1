@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - 汽车故障诊断系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --dark-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-color: #00d4ff;
+            --hover-color: #00b8e6;
+            --border-radius: 15px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --blur: blur(10px);
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+            background: var(--dark-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+        .register-container {
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+            padding: 50px 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .register-container:hover::before {
+            left: 100%;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .logo p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 1rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            backdrop-filter: var(--blur);
+        }
+        
+        .form-group input::placeholder, .form-group select::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .register-btn {
+            width: 100%;
+            background: var(--primary-gradient);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .register-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .register-btn:hover::before {
+            left: 100%;
+        }
+        
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .register-btn:active {
+            transform: translateY(0);
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+        }
+        
+        .login-link p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .login-link a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .login-link a:hover {
+            color: var(--hover-color);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+        
+        .role-description {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            backdrop-filter: var(--blur);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .role-description h3 {
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .role-item {
+            margin-bottom: 10px;
+            padding-left: 15px;
+            border-left: 3px solid var(--accent-color);
+            color: var(--text-secondary);
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: none;
+            backdrop-filter: var(--blur);
+            text-align: center;
+        }
+        
+        .alert-error {
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+        
+        .alert-success {
+            background: rgba(0, 255, 0, 0.1);
+            color: #6bff6b;
+            border: 1px solid rgba(107, 255, 107, 0.3);
+        }
+        
+        .password-strength {
+            margin-top: 5px;
+            font-size: 0.8rem;
+            height: 15px;
+        }
+        
+        .strength-weak { color: #e74c3c; }
+        .strength-medium { color: #f39c12; }
+        .strength-strong { color: #27ae60; }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">
+            <h1>汽车故障诊断系统</h1>
+            <p>创建您的账户</p>
+        </div>
+        
+        <div id="alert" class="alert"></div>
+        
+        <form id="registerForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username">用户名 *</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">账户类型 *</label>
+                    <select id="role" name="role" required>
+                        <option value="user">普通用户</option>
+                        <option value="employee">维修员工</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="real_name">真实姓名 *</label>
+                <input type="text" id="real_name" name="real_name" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phone">手机号码 *</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">电子邮箱 *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">密码 *</label>
+                    <input type="password" id="password" name="password" required>
+                    <div id="passwordStrength" class="password-strength"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm_password">确认密码 *</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="register-btn">注册账户</button>
+        </form>
+        
+        <div class="login-link">
+            <p>已有账户？ <a href="/login">立即登录</a></p>
+        </div>
+        
+        <div class="role-description">
+            <h3>账户类型说明</h3>
+            <div class="role-item">
+                <strong>普通用户</strong> - 可以查看故障分析、获取维修推荐、管理个人车辆信息
+            </div>
+            <div class="role-item">
+                <strong>维修员工</strong> - 拥有系统管理权限，可以查看所有用户数据、进行深度分析
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const alertBox = document.getElementById('alert');
+        const registerForm = document.getElementById('registerForm');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        const passwordStrength = document.getElementById('passwordStrength');
+        
+        function showAlert(message, type = 'error') {
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type}`;
+            alertBox.style.display = 'block';
+            
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+        
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+            
+            if (password.length === 0) {
+                passwordStrength.textContent = '';
+                passwordStrength.className = 'password-strength';
+            } else if (strength <= 2) {
+                passwordStrength.textContent = '密码强度：弱';
+                passwordStrength.className = 'password-strength strength-weak';
+            } else if (strength <= 4) {
+                passwordStrength.textContent = '密码强度：中';
+                passwordStrength.className = 'password-strength strength-medium';
+            } else {
+                passwordStrength.textContent = '密码强度：强';
+                passwordStrength.className = 'password-strength strength-strong';
+            }
+        }
+        
+        passwordInput.addEventListener('input', (e) => {
+            checkPasswordStrength(e.target.value);
+        });
+        
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(registerForm);
+            const data = Object.fromEntries(formData);
+            
+            // 验证表单
+            if (!data.username || !data.password || !data.real_name || !data.phone || !data.email) {
+                showAlert('请填写所有必填字段');
+                return;
+            }
+            
+            if (data.password !== data.confirm_password) {
+                showAlert('两次输入的密码不一致');
+                return;
+            }
+            
+            if (data.password.length < 6) {
+                showAlert('密码长度至少6位');
+                return;
+            }
+            
+            if (!/^1[3-9]\d{9}$/.test(data.phone)) {
+                showAlert('请输入正确的手机号码');
+                return;
+            }
+            
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+                showAlert('请输入正确的电子邮箱');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('注册成功！正在跳转到登录页面...', 'success');
+                    
+                    // 延迟跳转
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                } else {
+                    showAlert(result.message || '注册失败');
+                }
+            } catch (error) {
+                console.error('注册错误:', error);
+                showAlert('网络错误，请稍后重试');
+            }
+        });
+        
+        // 实时验证密码一致性
+        confirmPasswordInput.addEventListener('input', () => {
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                confirmPasswordInput.style.borderColor = '#e74c3c';
+            } else {
+                confirmPasswordInput.style.borderColor = '#ddd';
+            }
+        });
+    </script>
+</body>
+</html>

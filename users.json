@@ -1,0 +1,31 @@
+{
+  "admin": {
+    "username": "admin",
+    "role": "employee",
+    "real_name": "系统管理员",
+    "phone": "13800138000",
+    "email": "admin@faultsystem.com",
+    "created_at": "2025-12-31T10:24:07.300174",
+    "last_login": "2025-12-31T13:19:05.130922"
+  },
+  "user1": {
+    "username": "user1",
+    "password": "e606e38b0d8c19b24cf0ee3808183162ea7cd63ff7912dbb22b5e803286b4446",
+    "role": "user",
+    "real_name": "张三",
+    "phone": "13900139000",
+    "email": "user1@example.com",
+    "created_at": "2025-12-31T10:24:07.300183",
+    "last_login": "2025-12-31T13:45:11.881738"
+  },
+  "测试": {
+    "username": "测试",
+    "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+    "role": "user",
+    "real_name": "测试",
+    "phone": "15365465678",
+    "email": "1233@qq.com",
+    "created_at": "2025-12-31T14:13:23.165053",
+    "last_login": "2025-12-31T14:13:35.829095"
+  }
+}

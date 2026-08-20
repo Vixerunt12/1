@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户仪表板 - 汽车故障诊断系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f6fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-name {
+            font-weight: 500;
+        }
+        
+        .user-role {
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .dashboard {
+            padding: 30px 0;
+        }
+        
+        .welcome-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .welcome-section h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .welcome-section p {
+            color: #718096;
+            line-height: 1.6;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .action-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        
+        .action-icon {
+            font-size: 2.5rem;
+            width: 60px;
+            text-align: center;
+        }
+        
+        .action-content {
+            flex: 1;
+        }
+        
+        .action-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .action-desc {
+            color: #718096;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .recent-activity {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 20px;
+            border-left: 4px solid #48bb78;
+            padding-left: 10px;
+        }
+        
+        .activity-list {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .activity-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            text-align: center;
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+        
+        .activity-time {
+            color: #718096;
+            font-size: 0.8rem;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .chart-container {
+            height: 250px;
+            width: 100%;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .car-info {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .car-item {
+            background: #edf2f7;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .car-model {
+            font-weight: 500;
+            color: #2d3748;
+        }
+        
+        .car-mileage {
+            color: #718096;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">🚗 汽车故障诊断系统</div>
+                
+                <div class="nav-links">
+                    <a href="/user/dashboard" class="active">用户仪表板</a>
+                    <a href="/user/analysis">故障分析</a>
+                    <a href="/user/cost-analysis">成本分析</a>
+                    <a href="/user/maintenance">维修记录</a>
+                    <a href="/maintenance-recommendation">维修推荐</a>
+                    <a href="/user/profile">个人资料</a>
+                </div>
+                
+                <div class="user-info">
+                    <span class="user-name" id="userName">加载中...</span>
+                    <span class="user-role">用户</span>
+                    <button class="logout-btn" onclick="logout()">退出</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="dashboard">
+            <div class="welcome-section">
+                <h1>👋 欢迎回来，<span id="welcomeName">用户</span>！</h1>
+                <p>今天是 <span id="currentDate"></span>，您可以查看故障分析、获取维修推荐、管理您的车辆信息。</p>
+                
+                <div class="car-info">
+                    <div class="car-item">
+                        <div class="car-model">丰田卡罗拉</div>
+                        <div class="car-mileage">行驶里程: 25,092 km</div>
+                    </div>
+                    <div class="car-item">
+                        <div class="car-model">本田思域</div>
+                        <div class="car-mileage">行驶里程: 28,656 km</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <a href="/maintenance-recommendation" class="action-card">
+                    <div class="action-icon">🔧</div>
+                    <div class="action-content">
+                        <div class="action-title">维修方案推荐</div>
+                        <div class="action-desc">基于您的车辆信息和故障现象，获取最优维修方案</div>
+                    </div>
+                </a>
+                
+                <a href="/user/maintenance" class="action-card">
+                    <div class="action-icon">📋</div>
+                    <div class="action-content">
+                        <div class="action-title">维修记录管理</div>
+                        <div class="action-desc">查看和管理您的车辆维修历史记录</div>
+                    </div>
+                </a>
+                
+                <a href="/user/profile" class="action-card">
+                    <div class="action-icon">👤</div>
+                    <div class="action-content">
+                        <div class="action-title">个人资料设置</div>
+                        <div class="action-desc">更新您的个人信息和车辆资料</div>
+                    </div>
+                </a>
+                
+                <a href="/user/cost-analysis" class="action-card">
+                    <div class="action-icon">💰</div>
+                    <div class="action-content">
+                        <div class="action-title">成本分析</div>
+                        <div class="action-desc">了解各类维修的平均成本和趋势</div>
+                    </div>
+                </a>
+                
+                <a href="/user/analysis" class="action-card">
+                    <div class="action-icon">📊</div>
+                    <div class="action-content">
+                        <div class="action-title">故障分析</div>
+                        <div class="action-desc">查看系统故障统计数据和趋势分析</div>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="recent-activity">
+                <div class="section-title">最近活动</div>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon">🔍</div>
+                        <div class="activity-content">
+                            <div class="activity-title">故障诊断查询</div>
+                            <div class="activity-time">今天 10:30 - 发动机抖动问题分析</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">💡</div>
+                        <div class="activity-content">
+                            <div class="activity-title">维修方案获取</div>
+                            <div class="activity-time">昨天 15:20 - 获得3个推荐维修方案</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">📊</div>
+                        <div class="activity-content">
+                            <div class="activity-title">成本分析查看</div>
+                            <div class="activity-time">前天 09:15 - 查看了维修成本趋势</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-title">常见故障类型</div>
+                    <div class="chart-container" id="commonFaultsChart"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">维修成本分布</div>
+                    <div class="chart-container" id="costDistributionChart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chartInstances = {};
+        
+        // 初始化用户信息
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/auth/userinfo');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const user = result.data;
+                    document.getElementById('userName').textContent = user.real_name;
+                    document.getElementById('welcomeName').textContent = user.real_name;
+                }
+            } catch (error) {
+                console.error('加载用户信息失败:', error);
+            }
+        }
+        
+        // 加载统计数据
+        async function loadCharts() {
+            try {
+                const response = await fetch('/api/analysis/report');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const data = result.data;
+                    renderCommonFaultsChart(data.fault_category);
+                    renderCostDistributionChart(data.fault_reason);
+                }
+            } catch (error) {
+                console.error('加载图表数据失败:', error);
+            }
+        }
+        
+        // 渲染常见故障类型图表
+        function renderCommonFaultsChart(categoryData) {
+            chartInstances.commonFaultsChart = echarts.init(document.getElementById('commonFaultsChart'));
+            
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b}: {c}次 ({d}%)'
+                },
+                series: [{
+                    name: '故障类型',
+                    type: 'pie',
+                    radius: '70%',
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: true,
+                        formatter: '{b}: {c}'
+                    },
+                    data: categoryData.map(item => ({
+                        value: item.fault_count,
+                        name: item.category_name
+                    }))
+                }]
+            };
+            
+            chartInstances.commonFaultsChart.setOption(option);
+        }
+        
+        // 渲染成本分布图表
+        function renderCostDistributionChart(reasonData) {
+            chartInstances.costDistributionChart = echarts.init(document.getElementById('costDistributionChart'));
+            
+            // 取前10个故障原因
+            const topReasons = reasonData.slice(0, 10);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    data: topReasons.map(item => item.fault_code),
+                    axisLabel: {
+                        rotate: 45
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '平均成本(元)'
+                },
+                series: [{
+                    name: '平均维修成本',
+                    type: 'bar',
+                    data: topReasons.map(item => item.avg_cost),
+                    itemStyle: {
+                        color: '#48bb78'
+                    }
+                }]
+            };
+            
+            chartInstances.costDistributionChart.setOption(option);
+        }
+        
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                window.location.href = '/logout';
+            }
+        }
+        
+        // 设置当前日期
+        function setCurrentDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', options);
+        }
+        
+        // 响应式调整
+        window.addEventListener('resize', () => {
+            Object.values(chartInstances).forEach(chart => chart.resize());
+        });
+        
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', () => {
+            setCurrentDate();
+            loadUserInfo();
+            loadCharts();
+        });
+    </script>
+</body>
+</html>

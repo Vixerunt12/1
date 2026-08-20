@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>员工仪表板 - 汽车故障诊断系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --dark-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-color: #00d4ff;
+            --hover-color: #00b8e6;
+            --border-radius: 15px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --blur: blur(10px);
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+            background: var(--dark-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: var(--blur);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .user-role {
+            background: var(--accent-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: var(--blur);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dashboard {
+            padding: 40px 0;
+        }
+        
+        .welcome-section {
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .welcome-section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+        }
+        
+        .welcome-section h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .welcome-section p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .stat-card:hover::before {
+            left: 100%;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .action-card {
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .action-card:hover::before {
+            left: 100%;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+            text-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .action-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+            color: var(--text-primary);
+        }
+        
+        .action-desc {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 300;
+            line-height: 1.5;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 30px;
+        }
+        
+        .chart-card {
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+        }
+        
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        
+        .chart-container {
+            height: 350px;
+            width: 100%;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">汽车故障诊断系统</div>
+                
+                <div class="nav-links">
+                    <a href="/dashboard" class="active">仪表板</a>
+                    <a href="/employee/users">用户管理</a>
+                    <a href="/employee/analysis">数据分析</a>
+                    <a href="/logout">退出登录</a>
+                </div>
+                
+                <div class="user-info">
+                    <span class="user-name">{{ session.username }}</span>
+                    <span class="user-role">员工</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="dashboard">
+            <div class="welcome-section">
+                <h1>欢迎回来，{{ session.username }}！</h1>
+                <p>您当前拥有员工权限，可以管理用户、查看详细数据和生成分析报告。</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalUsers">0</div>
+                    <div class="stat-label">注册用户</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalFaults">0</div>
+                    <div class="stat-label">故障记录</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgCost">0</div>
+                    <div class="stat-label">平均维修成本(元)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="activeToday">0</div>
+                    <div class="stat-label">今日活跃用户</div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <a href="/employee/users" class="action-card">
+                    <div class="action-icon">👥</div>
+                    <div class="action-title">用户管理</div>
+                    <div class="action-desc">查看和管理所有用户账户</div>
+                </a>
+                <a href="/employee/analysis" class="action-card">
+                    <div class="action-icon">📊</div>
+                    <div class="action-title">数据分析</div>
+                    <div class="action-desc">深度分析系统数据和趋势</div>
+                </a>
+                <a href="/maintenance-recommendation" class="action-card">
+                    <div class="action-icon">🔧</div>
+                    <div class="action-title">维修推荐</div>
+                    <div class="action-desc">为车主提供维修方案建议</div>
+                </a>
+                <a href="/cost-analysis" class="action-card">
+                    <div class="action-icon">💰</div>
+                    <div class="action-title">成本分析</div>
+                    <div class="action-desc">分析维修成本和效益</div>
+                </a>
+            </div>
+            
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-title">故障类型分布</div>
+                    <div class="chart-container" id="categoryChart"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">用户注册趋势</div>
+                    <div class="chart-container" id="userTrendChart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chartInstances = {};
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            loadEmployeeStats();
+        });
+        
+        // 初始化图表
+        function initCharts() {
+            chartInstances.categoryChart = echarts.init(document.getElementById('categoryChart'));
+            chartInstances.userTrendChart = echarts.init(document.getElementById('userTrendChart'));
+            
+            // 响应式调整
+            window.addEventListener('resize', () => {
+                Object.values(chartInstances).forEach(chart => chart.resize());
+            });
+        }
+        
+        // 加载员工统计数据
+        async function loadEmployeeStats() {
+            try {
+                const response = await fetch('/api/employee/stats');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const data = result.data;
+                    
+                    // 更新用户统计数字
+                    document.getElementById('totalUsers').textContent = data.user_stats.total_users;
+                    document.getElementById('totalFaults').textContent = data.fault_stats.total_faults;
+                    document.getElementById('avgCost').textContent = Math.round(data.fault_stats.avg_cost);
+                    document.getElementById('activeToday').textContent = data.user_stats.active_today;
+                    
+                    // 渲染图表
+                    renderCategoryChart(data.fault_stats.categories);
+                    renderUserTrendChart(data.user_stats.user_trend);
+                } else {
+                    console.error('API返回失败:', result.error);
+                    // 使用默认数据
+                    renderDefaultStats();
+                }
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+                // 使用默认数据
+                renderDefaultStats();
+            }
+        }
+        
+        // 默认数据渲染
+        function renderDefaultStats() {
+            document.getElementById('totalUsers').textContent = '25';
+            document.getElementById('totalFaults').textContent = '156';
+            document.getElementById('avgCost').textContent = '850';
+            document.getElementById('activeToday').textContent = '8';
+            
+            // 默认图表数据
+            const defaultCategories = [
+                {'category_name': '发动机故障', 'fault_count': 45},
+                {'category_name': '电气系统', 'fault_count': 38},
+                {'category_name': '制动系统', 'fault_count': 28},
+                {'category_name': '传动系统', 'fault_count': 25},
+                {'category_name': '其他', 'fault_count': 20}
+            ];
+            
+            const defaultTrend = [
+                {'month': '1月', 'count': 5},
+                {'month': '2月', 'count': 8},
+                {'month': '3月', 'count': 12},
+                {'month': '4月', 'count': 15},
+                {'month': '5月', 'count': 18},
+                {'month': '6月', 'count': 22},
+                {'month': '7月', 'count': 25}
+            ];
+            
+            renderCategoryChart(defaultCategories);
+            renderUserTrendChart(defaultTrend);
+        }
+        
+        // 渲染故障类型分布图
+        function renderCategoryChart(categoryData) {
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} 次 ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    right: 10,
+                    top: 'center',
+                    textStyle: {
+                        color: 'rgba(255, 255, 255, 0.8)'
+                    }
+                },
+                color: ['#00d4ff', '#667eea', '#764ba2', '#f093fb', '#f5576c'],
+                series: [{
+                    name: '故障类型',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    center: ['40%', '50%'],
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: false
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: '16',
+                            fontWeight: 'bold',
+                            color: 'rgba(255, 255, 255, 0.9)'
+                        }
+                    },
+                    data: categoryData.map(item => ({
+                        value: item.fault_count,
+                        name: item.category_name
+                    }))
+                }]
+            };
+            
+            chartInstances.categoryChart.setOption(option);
+        }
+        
+        // 渲染用户趋势图
+        function renderUserTrendChart(trendData) {
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: '{b}: {c} 个用户'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: trendData.map(item => item.month),
+                    axisLine: {
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.3)'
+                        }
+                    },
+                    axisLabel: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.3)'
+                        }
+                    },
+                    axisLabel: {
+                        color: 'rgba(255, 255, 255, 0.7)'
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                },
+                series: [{
+                    data: trendData.map(item => item.count),
+                    type: 'line',
+                    smooth: true,
+                    lineStyle: {
+                        width: 3,
+                        color: '#00d4ff'
+                    },
+                    itemStyle: {
+                        color: '#00d4ff'
+                    },
+                    areaStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0,
+                            y: 0,
+                            x2: 0,
+                            y2: 1,
+                            colorStops: [{
+                                offset: 0, color: 'rgba(0, 212, 255, 0.3)'
+                            }, {
+                                offset: 1, color: 'rgba(0, 212, 255, 0.05)'
+                            }]
+                        }
+                    }
+                }]
+            };
+            
+            chartInstances.userTrendChart.setOption(option);
+        }
+        
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                window.location.href = '/logout';
+            }
+        }
+        
+        // 设置当前日期
+        function setCurrentDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', options);
+        }
+        
+        // 响应式调整
+        window.addEventListener('resize', () => {
+            Object.values(chartInstances).forEach(chart => chart.resize());
+        });
+        
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', () => {
+            setCurrentDate();
+            loadUserInfo();
+            loadStats();
+        });
+    </script>
+</body>
+</html>

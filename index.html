@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汽车故障诊断与维修推荐系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --dark-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-color: #00d4ff;
+            --hover-color: #00b8e6;
+            --border-radius: 15px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --blur: blur(10px);
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+            background: var(--dark-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(102, 126, 234, 0.4);
+            letter-spacing: -0.5px;
+        }
+        
+        .header p {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .nav-card {
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+            border-radius: var(--border-radius);
+            padding: 40px 30px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.4s ease;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .nav-card:hover::before {
+            left: 100%;
+        }
+        
+        .nav-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .nav-card h3 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+            text-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .nav-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 1rem;
+            font-weight: 300;
+        }
+        
+        .stats-overview {
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stats-overview h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            margin-top: 8px;
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+        
+        .quick-chart {
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .quick-chart h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+        
+        .chart-container {
+            height: 400px;
+            width: 100%;
+        }
+        
+        .footer {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 30px 20px;
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>汽车故障诊断与维修推荐系统</h1>
+            <p>基于Hadoop + Hive + Spark + Flask的智能故障分析平台</p>
+        </div>
+        
+        <div class="nav-cards">
+            <a href="/dashboard" class="nav-card">
+                <h3>数据仪表板</h3>
+                <p>查看完整的故障数据分析报告和可视化图表</p>
+            </a>
+            <a href="/fault-analysis" class="nav-card">
+                <h3>故障分析</h3>
+                <p>深入分析故障类型、原因和趋势</p>
+            </a>
+            <a href="/maintenance-recommendation" class="nav-card">
+                <h3>维修推荐</h3>
+                <p>获取智能维修方案和成本优化建议</p>
+            </a>
+            <a href="/cost-analysis" class="nav-card">
+                <h3>成本分析</h3>
+                <p>分析维修成本趋势和优化空间</p>
+            </a>
+        </div>
+        
+        <div class="stats-overview">
+            <h2>系统概览</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalFaults">0</div>
+                    <div class="stat-label">总故障记录</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="avgCost">0</div>
+                    <div class="stat-label">平均维修成本(元)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="carModels">0</div>
+                    <div class="stat-label">车型数量</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="faultTypes">3</div>
+                    <div class="stat-label">故障类型</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-cards">
+            <a href="/dashboard" class="nav-card">
+                <h3>📊 数据仪表板</h3>
+                <p>查看完整的故障分析数据和可视化图表</p>
+            </a>
+            <a href="/fault-analysis" class="nav-card">
+                <h3>🔍 故障分析</h3>
+                <p>深入分析故障类型、原因和分布规律</p>
+            </a>
+            <a href="/maintenance-recommendation" class="nav-card">
+                <h3>🔧 维修推荐</h3>
+                <p>基于历史数据智能推荐最优维修方案</p>
+            </a>
+            <a href="/cost-analysis" class="nav-card">
+                <h3>💰 成本分析</h3>
+                <p>分析维修成本趋势和经济效益</p>
+            </a>
+        </div>
+        
+        <div class="quick-chart">
+            <h2 style="text-align: center; margin-bottom: 20px; color: #2d3748;">故障类型分布</h2>
+            <div class="chart-container" id="categoryChart"></div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>© 2024 汽车故障诊断与维修推荐系统 | 技术支持: Hadoop + Hive + Spark + Flask</p>
+    </div>
+
+    <script>
+        // 加载统计数据
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/analysis/report');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const data = result.data;
+                    
+                    // 更新统计数字
+                    document.getElementById('totalFaults').textContent = 
+                        data.fault_category.reduce((sum, item) => sum + item.fault_count, 0);
+                    
+                    const avgCost = data.fault_reason.reduce((sum, item) => sum + item.avg_cost, 0) / data.fault_reason.length;
+                    document.getElementById('avgCost').textContent = avgCost.toFixed(0);
+                    
+                    document.getElementById('carModels').textContent = data.car_model_analysis.length;
+                    
+                    // 渲染故障类型图表
+                    renderCategoryChart(data.fault_category);
+                }
+            } catch (error) {
+                console.error('加载数据失败:', error);
+            }
+        }
+        
+        // 渲染故障类型分布图
+        function renderCategoryChart(categoryData) {
+            const chart = echarts.init(document.getElementById('categoryChart'));
+            
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    data: categoryData.map(item => item.category_name)
+                },
+                series: [{
+                    name: '故障类型',
+                    type: 'pie',
+                    radius: ['50%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: false,
+                        position: 'center'
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: '18',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labelLine: {
+                        show: false
+                    },
+                    data: categoryData.map(item => ({
+                        value: item.fault_count,
+                        name: item.category_name
+                    }))
+                }]
+            };
+            
+            chart.setOption(option);
+            
+            // 响应式调整
+            window.addEventListener('resize', () => {
+                chart.resize();
+            });
+        }
+        
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', loadStats);
+    </script>
+</body>
+</html>

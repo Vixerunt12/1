@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据仪表板 - 汽车故障诊断系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --dark-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-color: #00d4ff;
+            --hover-color: #00b8e6;
+            --border-radius: 15px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --blur: blur(10px);
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+            background: var(--dark-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: var(--blur);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: var(--blur);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dashboard {
+            padding: 40px 0;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            text-align: center;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .stat-card:hover::before {
+            left: 100%;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .chart-card {
+            background: var(--card-bg);
+            backdrop-filter: var(--blur);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+        }
+        
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        
+        .chart-container {
+            height: 400px;
+            width: 100%;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--accent-color);
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            backdrop-filter: var(--blur);
+        }
+        
+        .back-btn:hover {
+            background: rgba(0, 212, 255, 0.3);
+            transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">汽车故障诊断系统</div>
+                <div class="nav-links">
+                    <a href="/">首页</a>
+                    <a href="/fault-analysis">故障分析</a>
+                    <a href="/maintenance-recommendation">维修推荐</a>
+                    <a href="/cost-analysis">成本分析</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="dashboard">
+            <a href="/" class="back-btn">返回首页</a>
+            <h1 class="page-title">数据仪表板</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalFaults">0</div>
+                    <div class="stat-label">总故障记录</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgCost">0</div>
+                    <div class="stat-label">平均维修成本(元)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="carModels">0</div>
+                    <div class="stat-label">车型数量</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="faultTypes">3</div>
+                    <div class="stat-label">故障类型</div>
+                </div>
+            </div>
+            
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-title">故障类型分布</div>
+                    <div class="chart-container" id="categoryChart"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">维修成本趋势</div>
+                    <div class="chart-container" id="costTrendChart"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">车型故障统计</div>
+                    <div class="chart-container" id="modelChart"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">故障原因分析</div>
+                    <div class="chart-container" id="reasonChart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chartInstances = {};
+        
+        // 初始化所有图表
+        function initCharts() {
+            chartInstances.categoryChart = echarts.init(document.getElementById('categoryChart'));
+            chartInstances.costTrendChart = echarts.init(document.getElementById('costTrendChart'));
+            chartInstances.modelChart = echarts.init(document.getElementById('modelChart'));
+            chartInstances.reasonChart = echarts.init(document.getElementById('reasonChart'));
+            
+            // 响应式调整
+            window.addEventListener('resize', () => {
+                Object.values(chartInstances).forEach(chart => chart.resize());
+            });
+        }
+        
+        // 加载数据并渲染图表
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/analysis/report');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const data = result.data;
+                    
+                    // 更新统计数字
+                    if (data.fault_category && data.fault_category.length > 0) {
+                        document.getElementById('totalFaults').textContent = 
+                            data.fault_category.reduce((sum, item) => sum + (item.fault_count || 0), 0);
+                    } else {
+                        document.getElementById('totalFaults').textContent = '0';
+                    }
+                    
+                    if (data.stats && data.stats.avg_cost) {
+                        document.getElementById('avgCost').textContent = Math.round(data.stats.avg_cost);
+                    } else if (data.fault_reason && data.fault_reason.length > 0) {
+                        const avgCost = data.fault_reason.reduce((sum, item) => sum + (item.avg_cost || 0), 0) / data.fault_reason.length;
+                        document.getElementById('avgCost').textContent = Math.round(avgCost);
+                    } else {
+                        document.getElementById('avgCost').textContent = '0';
+                    }
+                    
+                    if (data.car_model && data.car_model.length > 0) {
+                        document.getElementById('carModels').textContent = data.car_model.length;
+                    } else {
+                        document.getElementById('carModels').textContent = '0';
+                    }
+                    
+                    // 渲染图表
+                    renderCategoryChart(data.fault_category || []);
+                    renderCostTrendChart(data.cost_trend || []);
+                    renderModelChart(data.car_model || []);
+                    renderReasonChart(data.fault_reason || []);
+                } else {
+                    console.error('API返回失败:', result.error);
+                    // 使用默认数据
+                    renderDefaultCharts();
+                }
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                // 使用默认数据
+                renderDefaultCharts();
+            }
+        }
+        
+        // 渲染故障类型分布图
+        function renderCategoryChart(categoryData) {
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    right: 10,
+                    top: 'center',
+                    data: categoryData.map(item => item.category_name)
+                },
+                series: [{
+                    name: '故障类型',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    center: ['40%', '50%'],
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: false
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: '18',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    data: categoryData.map(item => ({
+                        value: item.fault_count,
+                        name: item.category_name
+                    }))
+                }]
+            };
+            
+            chartInstances.categoryChart.setOption(option);
+        }
+        
+        // 渲染维修成本趋势图
+        function renderCostTrendChart(trendData) {
+            // 添加调试信息
+            console.log('成本趋势数据:', trendData);
+            
+            // 处理空数据情况
+            if (!trendData || trendData.length === 0) {
+                console.log('成本趋势数据为空，使用默认数据');
+                trendData = [
+                    {year_month: '2024-01', avg_cost: 850, maintenance_count: 5},
+                    {year_month: '2024-02', avg_cost: 920, maintenance_count: 8},
+                    {year_month: '2024-03', avg_cost: 780, maintenance_count: 6}
+                ];
+            }
+            
+            // 确保数据字段存在，使用备用字段名
+            const xData = trendData.map(item => {
+                // 尝试不同的字段名
+                return item.year_month || item.month || item.date || '未知月份';
+            });
+            
+            const costData = trendData.map(item => {
+                return item.avg_cost || item.cost || item.average_cost || 0;
+            });
+            
+            const countData = trendData.map(item => {
+                return item.maintenance_count || item.count || item.occurrence_count || 0;
+            });
+            
+            console.log('X轴数据:', xData);
+            console.log('成本数据:', costData);
+            console.log('次数数据:', countData);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross'
+                    },
+                    formatter: function(params) {
+                        let result = params[0].axisValue + '<br/>';
+                        params.forEach(param => {
+                            result += param.seriesName + ': ' + param.value + '<br/>';
+                        });
+                        return result;
+                    }
+                },
+                legend: {
+                    data: ['平均成本', '维修次数'],
+                    textStyle: {
+                        color: 'rgba(255, 255, 255, 0.8)'
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    data: xData,
+                    axisLabel: {
+                        color: 'rgba(255, 255, 255, 0.8)'
+                    }
+                },
+                yAxis: [{
+                    type: 'value',
+                    name: '成本(元)',
+                    position: 'left',
+                    axisLabel: {
+                        color: 'rgba(255, 255, 255, 0.8)'
+                    },
+                    nameTextStyle: {
+                        color: 'rgba(255, 255, 255, 0.8)'
+                    }
+                }, {
+                    type: 'value',
+                    name: '次数',
+                    position: 'right',
+                    axisLabel: {
+                        color: 'rgba(255, 255, 255, 0.8)'
+                    },
+                    nameTextStyle: {
+                        color: 'rgba(255, 255, 255, 0.8)'
+                    }
+                }],
+                series: [{
+                    name: '平均成本',
+                    type: 'line',
+                    yAxisIndex: 0,
+                    data: costData,
+                    smooth: true,
+                    lineStyle: {
+                        width: 3,
+                        color: '#00d4ff'
+                    },
+                    itemStyle: {
+                        color: '#00d4ff'
+                    }
+                }, {
+                    name: '维修次数',
+                    type: 'bar',
+                    yAxisIndex: 1,
+                    data: countData,
+                    itemStyle: {
+                        color: '#667eea'
+                    }
+                }]
+            };
+            
+            chartInstances.costTrendChart.setOption(option);
+        }
+        
+        // 渲染车型故障统计图
+        function renderModelChart(modelData) {
+            const xData = modelData.map(item => item.car_model);
+            const faultData = modelData.map(item => item.fault_count);
+            const costData = modelData.map(item => item.avg_cost);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    data: ['故障次数', '平均成本']
+                },
+                xAxis: {
+                    type: 'category',
+                    data: xData,
+                    axisLabel: {
+                        rotate: 45
+                    }
+                },
+                yAxis: [{
+                    type: 'value',
+                    name: '故障次数'
+                }, {
+                    type: 'value',
+                    name: '成本(元)',
+                    position: 'right'
+                }],
+                series: [{
+                    name: '故障次数',
+                    type: 'bar',
+                    data: faultData
+                }, {
+                    name: '平均成本',
+                    type: 'line',
+                    yAxisIndex: 1,
+                    data: costData,
+                    smooth: true
+                }]
+            };
+            
+            chartInstances.modelChart.setOption(option);
+        }
+        
+        // 渲染故障原因分析图
+        function renderReasonChart(reasonData) {
+            const topReasons = reasonData.slice(0, 10);
+            const xData = topReasons.map(item => item.fault_code);
+            const countData = topReasons.map(item => item.occurrence_count);
+            const costData = topReasons.map(item => item.avg_cost);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    data: ['发生次数', '平均成本']
+                },
+                xAxis: {
+                    type: 'category',
+                    data: xData
+                },
+                yAxis: [{
+                    type: 'value',
+                    name: '发生次数'
+                }, {
+                    type: 'value',
+                    name: '成本(元)',
+                    position: 'right'
+                }],
+                series: [{
+                    name: '发生次数',
+                    type: 'bar',
+                    data: countData
+                }, {
+                    name: '平均成本',
+                    type: 'line',
+                    yAxisIndex: 1,
+                    data: costData,
+                    smooth: true
+                }]
+            };
+            
+            chartInstances.reasonChart.setOption(option);
+        }
+        
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            loadDashboardData();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>维修记录 - 汽车故障诊断系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f6fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .content {
+            padding: 30px 0;
+        }
+        
+        .page-header {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .page-description {
+            color: #718096;
+            line-height: 1.6;
+        }
+        
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .form-group {
+            margin-bottom: 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #38a169;
+        }
+        
+        .maintenance-list {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .list-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .list-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .maintenance-item {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.3s;
+        }
+        
+        .maintenance-item:hover {
+            background: #f7fafc;
+        }
+        
+        .maintenance-item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .car-info {
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .date {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        .item-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            color: #718096;
+            font-size: 0.8rem;
+            margin-bottom: 3px;
+        }
+        
+        .detail-value {
+            color: #2d3748;
+            font-weight: 500;
+        }
+        
+        .cost {
+            color: #e53e3e;
+            font-weight: bold;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-completed {
+            background: #f0fff4;
+            color: #22543d;
+        }
+        
+        .status-pending {
+            background: #fffaf0;
+            color: #744210;
+        }
+        
+        .status-cancelled {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">🚗 汽车故障诊断系统</div>
+                
+                <div class="nav-links">
+                    <a href="/user/dashboard">用户仪表板</a>
+                    <a href="/user/profile">个人资料</a>
+                    <a href="/user/maintenance" class="active">维修记录</a>
+                    <a href="/maintenance-recommendation">维修推荐</a>
+                </div>
+                
+                <div class="user-info">
+                    <span class="user-name" id="userName">加载中...</span>
+                    <button class="logout-btn" onclick="logout()">退出</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="content">
+            <div class="page-header">
+                <h1 class="page-title">📋 维修记录</h1>
+                <p class="page-description">查看和管理您的车辆维修历史记录。</p>
+            </div>
+            
+            <div class="filters">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="carFilter">选择车辆</label>
+                        <select id="carFilter">
+                            <option value="">所有车辆</option>
+                            <option value="1">丰田卡罗拉 (粤B12345)</option>
+                            <option value="2">本田思域 (粤B67890)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="statusFilter">维修状态</label>
+                        <select id="statusFilter">
+                            <option value="">所有状态</option>
+                            <option value="completed">已完成</option>
+                            <option value="pending">进行中</option>
+                            <option value="cancelled">已取消</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dateFilter">时间范围</label>
+                        <select id="dateFilter">
+                            <option value="">全部时间</option>
+                            <option value="7">最近7天</option>
+                            <option value="30">最近30天</option>
+                            <option value="90">最近3个月</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-primary" onclick="applyFilters()">筛选</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="maintenance-list">
+                <div class="list-header">
+                    <div class="list-title">维修记录列表</div>
+                    <div style="color: #718096; font-size: 0.9rem;">共 <span id="recordCount">0</span> 条记录</div>
+                </div>
+                
+                <div id="maintenanceRecords">
+                    <div class="loading">正在加载维修记录...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let maintenanceRecords = [];
+        
+        // 加载用户信息
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/auth/userinfo');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const user = result.data;
+                    document.getElementById('userName').textContent = user.real_name;
+                }
+            } catch (error) {
+                console.error('加载用户信息失败:', error);
+            }
+        }
+        
+        // 加载维修记录
+        async function loadMaintenanceRecords() {
+            try {
+                // 模拟维修记录数据
+                maintenanceRecords = [
+                    {
+                        id: 1,
+                        car: '丰田卡罗拉 (粤B12345)',
+                        date: '2024-01-15',
+                        fault: '发动机抖动',
+                        solution: '更换火花塞',
+                        cost: 850,
+                        status: 'completed',
+                        workshop: '丰田4S店',
+                        technician: '张师傅'
+                    },
+                    {
+                        id: 2,
+                        car: '本田思域 (粤B67890)',
+                        date: '2024-01-10',
+                        fault: '刹车异响',
+                        solution: '更换刹车片',
+                        cost: 1200,
+                        status: 'completed',
+                        workshop: '本田4S店',
+                        technician: '李师傅'
+                    },
+                    {
+                        id: 3,
+                        car: '丰田卡罗拉 (粤B12345)',
+                        date: '2024-01-05',
+                        fault: '空调不制冷',
+                        solution: '加注制冷剂',
+                        cost: 300,
+                        status: 'completed',
+                        workshop: '快修连锁店',
+                        technician: '王师傅'
+                    },
+                    {
+                        id: 4,
+                        car: '本田思域 (粤B67890)',
+                        date: '2024-01-20',
+                        fault: '轮胎磨损',
+                        solution: '四轮定位',
+                        cost: 280,
+                        status: 'pending',
+                        workshop: '轮胎专修店',
+                        technician: '赵师傅'
+                    }
+                ];
+                
+                renderMaintenanceRecords(maintenanceRecords);
+            } catch (error) {
+                console.error('加载维修记录失败:', error);
+                document.getElementById('maintenanceRecords').innerHTML = 
+                    '<div class="empty-state">加载维修记录失败，请稍后重试</div>';
+            }
+        }
+        
+        // 渲染维修记录
+        function renderMaintenanceRecords(records) {
+            const container = document.getElementById('maintenanceRecords');
+            
+            if (records.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <h3>暂无维修记录</h3>
+                        <p>您还没有任何维修记录，快去体验我们的维修推荐功能吧！</p>
+                    </div>
+                `;
+                document.getElementById('recordCount').textContent = '0';
+                return;
+            }
+            
+            container.innerHTML = records.map(record => `
+                <div class="maintenance-item">
+                    <div class="item-header">
+                        <div class="car-info">${record.car}</div>
+                        <div class="date">${formatDate(record.date)}</div>
+                    </div>
+                    
+                    <div class="item-details">
+                        <div class="detail-item">
+                            <span class="detail-label">故障现象</span>
+                            <span class="detail-value">${record.fault}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">维修方案</span>
+                            <span class="detail-value">${record.solution}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">维修费用</span>
+                            <span class="detail-value cost">¥${record.cost}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">维修状态</span>
+                            <span class="status status-${record.status}">
+                                ${getStatusText(record.status)}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="item-details">
+                        <div class="detail-item">
+                            <span class="detail-label">维修门店</span>
+                            <span class="detail-value">${record.workshop}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">维修技师</span>
+                            <span class="detail-value">${record.technician}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="item-actions">
+                        <button class="btn btn-primary btn-small" onclick="viewRecord(${record.id})">查看详情</button>
+                        <button class="btn btn-secondary btn-small" onclick="downloadRecord(${record.id})">下载报告</button>
+                        <button class="btn btn-secondary btn-small" onclick="rateRecord(${record.id})">评价</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('recordCount').textContent = records.length;
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-CN');
+        }
+        
+        // 获取状态文本
+        function getStatusText(status) {
+            const statusMap = {
+                'completed': '已完成',
+                'pending': '进行中',
+                'cancelled': '已取消'
+            };
+            return statusMap[status] || status;
+        }
+        
+        // 应用筛选
+        function applyFilters() {
+            const carFilter = document.getElementById('carFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            
+            let filteredRecords = maintenanceRecords;
+            
+            // 车辆筛选
+            if (carFilter) {
+                filteredRecords = filteredRecords.filter(record => {
+                    if (carFilter === '1') return record.car.includes('丰田卡罗拉');
+                    if (carFilter === '2') return record.car.includes('本田思域');
+                    return true;
+                });
+            }
+            
+            // 状态筛选
+            if (statusFilter) {
+                filteredRecords = filteredRecords.filter(record => record.status === statusFilter);
+            }
+            
+            // 时间筛选
+            if (dateFilter) {
+                const days = parseInt(dateFilter);
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - days);
+                
+                filteredRecords = filteredRecords.filter(record => {
+                    const recordDate = new Date(record.date);
+                    return recordDate >= cutoffDate;
+                });
+            }
+            
+            renderMaintenanceRecords(filteredRecords);
+        }
+        
+        // 查看记录详情
+        function viewRecord(recordId) {
+            alert(`查看维修记录详情: ${recordId}`);
+        }
+        
+        // 下载报告
+        function downloadRecord(recordId) {
+            alert(`下载维修报告: ${recordId}`);
+        }
+        
+        // 评价记录
+        function rateRecord(recordId) {
+            alert(`评价维修记录: ${recordId}`);
+        }
+        
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                window.location.href = '/logout';
+            }
+        }
+        
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserInfo();
+            loadMaintenanceRecords();
+        });
+    </script>
+</body>
+</html>
